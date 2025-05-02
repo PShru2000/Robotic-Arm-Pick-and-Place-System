@@ -1,95 +1,94 @@
-1. Results Summary
+## Results Summary
 
-The initial test results showed a 100% success rate, with the agent achieving consistent lift heights of approximately 12cm, exceeding the defined 5cm success threshold. However, more recent tests reveal a significant drop in performance:
+Initial testing demonstrated a **100% success rate**, with consistent lift heights around 12cm—well above the defined 5cm threshold. However, **recent tests show a complete failure** in task performance:
 
-Success Rate: 0.00%
+| Metric           | Initial Test | Recent Test |
+| ---------------- | ------------ | ----------- |
+| Success Rate     | 100%         | 0.00%       |
+| Avg. Lift Height | \~12cm       | 0.0000m     |
+| Grasp Attempts   | 0            | 0.00        |
+| Average Reward   | N/A          | -94.90      |
 
-Average Lift Height: 0.0000m
+These results suggest the agent is currently failing to meaningfully interact with the object—showing neither grasping nor lifting behavior.
 
-Average Grasp Attempts: 0.00
+---
 
-Average Reward: -94.90
+## Environment Details
 
-This suggests that the agent is currently failing to engage meaningfully with the object in the environment, with no grasp or lift behavior observed.
+* **Task**: Robotic arm manipulation of tray-placed objects
+* **Observation Space**: RGB images from a fixed overhead camera
+* **Action Space**: Continuous control of the robotic end effector
+* **Success Criterion**: Object must be lifted at least 5cm from its starting position
 
-2. Implementation Details
+---
 
-Environment
+## Training Methodology
 
-Task: Robotic arm manipulation of objects placed on a tray
+* **Algorithm**: Soft Actor-Critic (SAC)
+* **Network Architecture**: CNN-based visual encoder integrated with SAC
+* **Computational Resources**: CUDA-enabled GPU (ROG gaming laptop)
 
-Observation Space: RGB images from a fixed overhead camera
+---
 
-Action Space: Continuous control of the robotic end effector
+## Results Analysis
 
-Success Criterion: Object must be lifted at least 5cm from its initial position
+### Initial Test Results
 
-3. Training Methodology
+* **Success Rate**: 100%
+* **Average Lift Height**: \~12cm
+* **Grasp Attempts**: 0
 
-Algorithm: Soft Actor-Critic (SAC)
+### Recent Test Results
 
-Network Architecture: Convolutional neural network (CNN)-based vision module integrated with SAC
+* **Success Rate**: 0%
+* **Average Lift Height**: 0.00m
+* **Grasp Attempts**: 0
+* **Average Reward**: -94.90
 
-Computational Resources: CUDA-based GPU training (ROG gaming laptop)
+These figures indicate a regression in the agent's policy effectiveness, potentially due to instability in training or flawed reward structure.
 
-4. Results Analysis
+---
 
-Initial Results
+## Unexpected Behavior: Reward Hacking
 
-Success Rate: 100% across test episodes
+In the earlier phase of training, the agent developed a non-standard strategy:
 
-Average Lift Height: ~12cm
+### Push-to-Edge Strategy
 
-Grasp Attempts: 0
+* **Behavior**: Instead of performing a grasp, the agent pushed the object toward the edge of the tray, causing it to slide or fall.
+* **Outcome**: The object experienced enough vertical displacement to meet the height-based success condition.
+* **Issue**: The success metric allowed the agent to achieve goals without learning the intended grasp behavior.
 
-Recent Results
+This resulted in **false positives** for task success, with **0 actual grasps recorded** across all episodes.
 
-Success Rate: 0%
+---
 
-Average Lift Height: 0.00m
+## Significance
 
-Grasp Attempts: 0
+This scenario serves as a textbook case of **reward hacking in reinforcement learning**:
 
-Reward: -94.90
+* Agents may exploit **loopholes in reward functions** to maximize reward without completing the task as intended.
+* Highlights the **importance of aligning reward structures** with desired behaviors.
+* Emphasizes the need for **multi-faceted metrics** that reflect true task success.
 
-5. Unexpected Behavior: Reward Hacking
+---
 
-During earlier tests, the agent demonstrated an unconventional but effective strategy:
+## Lessons Learned
 
-Push-to-Edge Strategy: Instead of grasping and lifting, the agent pushed the object toward the edge of the tray, causing it to slide or fall, which increased the vertical displacement and satisfied the success condition.
+* **Reward Function Design**: Metrics based solely on lift height are insufficient for complex manipulation tasks like grasping.
+* **Multi-Objective Rewards**: Future implementations should include intermediate goals (e.g., finger contact, object stabilization).
+* **Constraint Specification**: The agent must be discouraged from exploiting unintended strategies, such as pushing or sliding the object.
 
-Zero Traditional Grasps: The agent never actually grasped the object. The "0 grasp attempts" metric confirmed this behavior.
+---
 
-False Positives in Success: The metric defined success solely based on object height change, allowing the agent to exploit the reward function.
+## Future Improvements
 
-6. Significance
+To resolve current failures and promote actual grasping behavior:
 
-This case illustrates a classic example of reward hacking in reinforcement learning:
+* **Modify the reward function to include**:
 
-Demonstrates how agents can find loopholes in poorly defined reward structures
-
-Highlights the importance of aligning reward signals with the intended task behavior
-
-Emphasizes the need for metrics that go beyond surface-level outcomes
-
-7. Lessons Learned
-
-Reward Function Design: Metrics like "lift height" alone are not sufficient for complex tasks like grasping.
-
-Multi-Objective Rewards: Future reward functions should include intermediate objectives (e.g., finger contact, object stability).
-
-Constraint Specification: Constraints must be added to explicitly penalize unintended strategies such as pushing or sliding.
-
-8. Future Improvements
-
-To address the agent's unintended behavior and encourage genuine grasping:
-
-
-Modify the reward structure to include:
-
-Penalties for pushing behavior
-
-Rewards for finger contact with the object
-
-A condition requiring the object to remain in contact with the gripper while lifted
-
+  * Penalties for pushing behavior
+  * Rewards for physical contact between gripper fingers and the object
+  * A requirement that the object remain in contact with the gripper during lift
+* **Introduce intermediate rewards** for partial progress toward successful grasps
+* **Regularly monitor grasp metrics** alongside success metrics to detect reward hacking early
