@@ -1,85 +1,88 @@
-1. Results Summary
+# Hybrid Control Strategy 
 
-After extensive training and reward tuning, the RL agent demonstrates consistent success in the initial stage of the task, but fails to progress to full task completion.
+This phase addresses a critical exploration bottleneck observed during prolonged RL training. Despite effective positioning behavior, the agent fails to learn grasping. A hybrid control strategy is introduced to bridge this gap and ensure task completion.
 
-Current Performance (Post 150,000 Steps):
+---
 
-Stage 1 (Positioning/Descent): Mastered with 100% consistency
+## Results Summary
 
-Stage 2 (Grasping): Not reached
+After extensive training (150,000+ timesteps) and reward tuning, the agent demonstrates consistent success in early stages but fails to achieve full task execution.
 
-Test Success Rate: 0.00%
+**Current Performance:**
 
-Average Reward: ~54.0 (up from 6.2 early in training)
+* **Stage 1 (Positioning/Descent)**: Mastered with 100% consistency
+* **Stage 2 (Grasping)**: Not reached
+* **Test Success Rate**: 0.00%
+* **Average Reward**: \~54.0 (up from 6.2 early in training)
+* **Grasp Attempts**: 0 across all test episodes
 
-Grasp Attempts: 0 across all test episodes
+These results suggest the agent has **reached a local optimum** by exploiting early-stage rewards without progressing toward grasping or lifting behaviors.
 
-These results indicate that the agent has reached a local optimum, exploiting the reward shaping for positioning but failing to explore further into the task sequence.
+---
 
-2. Implementation Details
+## Implementation Details
 
-Environment
+* **Task**: Robotic grasp-and-lift
+* **Visual Input**: YOLO-based object detection
+* **Action Space**: Continuous 6-DOF end-effector control + gripper state
+* **Reward Structure**: Five-stage shaped reward function
+* **Training Duration**: 150,000+ timesteps
+* **Evaluation Metrics**: Lift height, average reward, grasp attempts
 
-Task: Robotic grasp-and-lift
+---
 
-Visual Input: YOLO-based object detection
+## Current Challenge: Exploration Bottleneck
 
-Action Space: Continuous 6-DOF control + gripper
+The agent has encountered an **exploration bottleneck**, a known issue in RL where:
 
-Reward Structure: Five-stage shaped rewards
+* The policy stabilizes around a locally optimal but incomplete behavior (e.g., hovering).
+* The subsequent actions (grasping, descent) are **rarely explored** due to low probability and sparse rewards.
+* **Increased training time does not lead to transition**, indicating a failure to generalize beyond early success stages.
 
-Training Episodes: 150,000+ timesteps
+Importantly, **perception and detection are not the problem**—the issue lies in the policy’s inability to explore further action combinations.
 
-Evaluation: Automated metrics (lift height, reward, grasp attempts)
+---
 
-3. Current Challenge: Exploration Bottleneck
+## Recommended Solution: Hybrid Control Strategy
 
-The agent has reached an "exploration bottleneck," a known issue in reinforcement learning where:
+To overcome this bottleneck while retaining learned positioning behavior, we adopt a **hybrid control approach**:
 
-The policy discovers a locally optimal behavior (e.g., hovering above the object)
+### Phase 1: RL-Based Positioning
 
-The next required actions (e.g., gripper closure, fine descent) are difficult to discover due to low probability and sparse reward reinforcement
+* Use the trained RL policy to guide the arm to a **hover state above the object**.
+* Covers **Stage 0 → Stage 1** using learned behaviors.
 
-Without a clear reward incentive or guidance for attempting new action combinations, the agent fails to explore beyond its current strategy
+### Phase 2: Manual Grasp Execution
 
-Despite increasing total rewards and training time, the agent does not transition to grasping behavior, confirming that this is not a perception or detection issue.
+* Once the agent reaches a stable hover, trigger a scripted grasping sequence:
 
-4. Recommended Solution: Hybrid Control
+  * **Descend** by a fixed offset
+  * **Close** the gripper
+  * **Lift** the object by a fixed height
+  * **Evaluate** grasp success via object displacement and gripper state
 
-To overcome the bottleneck while preserving the successful aspects of training, a hybrid control strategy is adapted next:
+---
 
-Phase 1: RL-Based Positioning
+## Implementation Plan
 
-Use the trained RL policy to position the end-effector directly above the object (Stage 0 → Stage 1)
+To integrate hybrid control into the current environment:
 
+1. **Stage Detection**
 
-Phase 2: Manual Grasp Execution
+   * Enhance the environment to detect when the agent completes Stage 1 (hovering above object)
 
-Once the agent reaches a stable hover state above the object, trigger a manual grasping sequence
+2. **Control Switch**
 
-This sequence would control:
+   * Initiate manual grasp logic when the RL policy stabilizes in the hover zone
 
-Vertical descent
+3. **Manual Grasp Logic**
 
-Gripper closure
+   * Execute:
 
-Lifting motion
+     * Downward motion
+     * Gripper closure
+     * Upward lift
+   * Record success based on:
 
-
-5. Implementation Plan
-
-To implement the hybrid system:
-
-Stage Detection: Modify the environment to detect when the RL agent achieves Stage 1 
-
-Control Switch: Trigger manual control logic once Stage 1 conditions are met
-
-Manual Grasp Logic:
-
-Descend a fixed distance
-
-Close the gripper
-
-Lift a fixed height
-
-Evaluate success (object displacement, gripper status)
+     * Object height change
+     * Gripper engagement
