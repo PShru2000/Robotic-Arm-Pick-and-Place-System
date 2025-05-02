@@ -1,10 +1,10 @@
 ## Results Summary
 
-The agent is trained using a **five-stage reward system** that breaks down the grasping task into smaller sub-goals. Initial results demonstrate partial success:
+The agent is trained using a **five-stage reward system** to decompose the grasping task into smaller, learnable sub-goals. Initial training results indicate partial success:
 
 * The agent **consistently reaches Stage 0**: positioning above the object.
-* It **fails to transition to Stage 2 (Grasp)**, resulting in plateaued rewards at **53.63**.
-* **Grasp attempts remain at 0**, with **no successful lifts** recorded.
+* It **fails to transition to Stage 2 (Grasp)**, leading to **plateaued rewards at 53.63**.
+* **Grasp attempts remain at 0**, with **no successful lifts** observed.
 
 ---
 
@@ -14,20 +14,20 @@ The agent is trained using a **five-stage reward system** that breaks down the g
 * **Visual Input**: YOLO-based object detection from RGB camera feed
 * **Action Space**: Continuous control over 3D end-effector position and gripper state
 * **Reward System**: Five-stage shaped reward model
-* **Success Criterion**: Object must be grasped and lifted ≥ 5cm
+* **Success Criterion**: Object must be grasped and lifted at least 5cm
 
 ---
 
 ## Training Methodology
 
 * **Algorithm**: Soft Actor-Critic (SAC)
-* **Network Architecture**: CNN-based image encoder integrated with actor-critic network
+* **Network Architecture**: CNN-based image encoder integrated with an actor-critic network
 * **Training Configuration**:
 
   * GPU-enabled training (ROG laptop)
   * Batch size: 256
   * Learning rate: 0.0003
-  * Entropy coefficient applied for exploration
+  * Entropy coefficient to promote exploration
 * **Environment**: Custom `VisualRoboticArmEnv` with `use_staged_rewards=True`
 
 ---
@@ -36,50 +36,50 @@ The agent is trained using a **five-stage reward system** that breaks down the g
 
 ### Observed Training Behavior
 
-* The agent reliably completes **Stage 0** (hovering above the object).
-* YOLO detection is stable and accurate.
-* Reward signals **plateau at 53.63**, indicating failure to advance to grasping.
-* **Actor loss** is increasing, suggesting exploration; **critic loss** is high (\~252), which is typical during early training.
+* The agent consistently completes **Stage 0** (hovering above the object).
+* YOLO-based object detection is functioning correctly.
+* Reward values **plateau at 53.63**, indicating no advancement to the grasp stage.
+* **Actor loss** is increasing (reflecting exploration), while **critic loss** is high (\~252), typical during early-stage value function learning.
 
 ### Interpretation
 
-* The agent likely converged to a **local optimum** (hovering position).
-* No exploration of descent or grasping behaviors is observed.
+* The agent has likely **converged to a local optimum** at Stage 0.
+* No descent or grasp behavior has been explored beyond this stable state.
 
 ---
 
 ## Current Bottleneck: Stage Transition
 
-The primary challenge lies in transitioning from:
+The primary challenge lies in the transition from:
 
 **Stage 0 → Stage 1 → Stage 2**
-The agent fails to move from hovering to descent and gripper engagement.
+The agent is unable to move from hovering to descent and initiate gripper actions.
 
 ---
 
 ## Potential Reasons
 
-* **Weak reward signal** for grasping, relative to hovering.
-* **Low value estimates** for new behaviors like descending or gripping.
-* **Flat reward gradient** between stages fails to motivate deeper exploration.
+* The **reward for grasping** may be too weak compared to the stable hovering reward.
+* The agent may have **low value confidence** in exploratory behaviors like descending or closing the gripper.
+* A **flat reward gradient** between stages fails to encourage forward progression.
 
 ---
 
 ## Significance
 
-This scenario illustrates key challenges in multi-step reinforcement learning tasks:
+This training scenario highlights common challenges in multi-step robotic reinforcement learning:
 
-* **Reward shaping** is essential for learning complex behaviors.
-* Agents can **stall at local optima** without adequate incentives to move forward.
-* **Stage transitions** are critical failure points in real-world robotic training.
+* **Reward shaping** is critical to enable complex, sequential behavior.
+* Agents may **stagnate at local optima** if transitions are not well-incentivized.
+* **Stage transitions** are often the failure point in real-world robotic tasks.
 
 ---
 
 ## Lessons Learned
 
-* Reward shaping must ensure that **stage transitions are clearly incentivized**.
-* **Sparse final rewards** (e.g., successful lift) are insufficient on their own.
-* **Gripper engagement** needs stronger representation in both reward and value signals.
+* Effective **reward shaping** must include strong incentives for **stage transitions**.
+* **Sparse final rewards** are insufficient for fine-grained behavior learning.
+* **Gripper actions** require greater emphasis in both the reward and value models.
 
 ---
 
@@ -87,21 +87,22 @@ This scenario illustrates key challenges in multi-step reinforcement learning ta
 
 ### Reward and Transition Design
 
-* **Increase the reward gap** between Stage 1 (descent) and Stage 2 (grasp) to encourage exploration.
-* **Refine stage detection logic** to make transitions more robust in early training.
-* **Introduce temporary shaping rewards** that encourage gripper closure near the object.
+* **Increase the reward gap** between descent (Stage 1) and grasp (Stage 2) to promote deeper exploration.
+* **Refine stage detection logic** to allow more forgiving transitions during early training.
+* **Introduce temporary reward shaping** for gripper closure when near the object.
 
 ### Hybrid Control Strategy
 
-Consider a **hybrid approach** that combines RL and deterministic logic:
+To increase task robustness, consider a hybrid approach:
 
-* Use RL for **localization and approach** (Stages 0–1).
-* Use rule-based control for **grasp and lift** (Stages 2–4) when RL confidence is low.
-* This fallback mechanism ensures task progression even when end-to-end RL struggles to generalize.
+* Use RL for **object localization and approach** (Stages 0–1)
+* Apply rule-based control for **grasp and lift** (Stages 2–4) when RL policy confidence is low
+* This fallback system ensures task completion even if full end-to-end RL underperforms
 
 ---
 
 ## Training Stability
 
-* Temporarily **increase entropy coefficient** to force exploration beyond Stage 0.
-* Extend training **beyond 50,000 steps** to allow for deeper policy development and better value estimates.
+* **Increase entropy coefficient** temporarily to encourage exploration beyond the hovering stage.
+* **Extend training beyond 50,000 steps** to allow the policy more opportunity to discover grasping behavior and refine value estimates.
+
