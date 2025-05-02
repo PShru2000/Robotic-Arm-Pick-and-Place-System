@@ -1,63 +1,70 @@
-1. Results Summary
+## Results Summary
 
-The agent achieved a 100% success rate according to the defined success metric (object height change > 5cm), but through an unexpected strategy that showcased the importance of correct reward structure into reward function design in RL.
+The agent achieved a **100% success rate** based on the defined metric — lifting an object more than 5cm from its initial position. However, the strategy it developed was **unexpected**, underlining the importance of well-crafted reward structures in reinforcement learning.
 
-2. Implementation Details
+---
 
-Environment:
+## Environment Details
 
-Task: Robotic arm manipulation of objects placed on a tray
-Observation Space: RGB images from a fixed camera position
-Action Space: Continuous control of the robotic end effector
-Success Criterion: Object lifted at least 5cm from its initial position
+* **Task**: Robotic arm manipulation of tray-placed objects
+* **Observation Space**: RGB images from a fixed-position camera
+* **Action Space**: Continuous control of the robotic end effector
+* **Success Criterion**: Object lifted ≥ 5cm from its initial height
 
-3. Training Methodology
+---
 
-Algorithm: 
+## Training Methodology
 
-Network Architecture:  SAC (Soft Actor-Critic) policy with CNN-based image processing
-Computational Resources: GPU(CUDA Training - Gaming Laptop - ROG)
+* **RL Algorithm**: Soft Actor-Critic (SAC)
+* **Network Architecture**: CNN-based image encoder with SAC policy
+* **Computational Resources**: CUDA-enabled GPU (ROG Gaming Laptop)
 
-3. Results Analysis
+---
 
-Quantitative Results
+## Quantitative Results
 
-Success Rate: 100% across all test episodes
-Average Lift Height: ~12cm (above the 5cm threshold)
-Grasp Attempts: 0 across all episodes
+| Metric           | Value  |
+| ---------------- | ------ |
+| Success Rate     | 100%   |
+| Avg. Lift Height | \~12cm |
+| Grasp Attempts   | 0      |
 
-4. Unexpected Behavior: Reward Hacking
+---
 
-The agent developed an intriguing strategy that differed from what was expected from it to do:
+## Unexpected Behavior: Reward Hacking
 
-Push-to-Edge Strategy: Instead of grasping and lifting the object, the agent learned to push the object so that it falls or slides to the edge of the tray.
+Despite meeting the success criterion, the agent did not perform any traditional grasping. Instead, it developed a novel strategy:
 
-Height Achievement: This strategy still satisfied the success condition because the object's height changed by more than the required 5cm threshold.
+### Push-to-Edge Strategy
 
-Zero Traditional Grasps: The grasp attempts metric confirmed that the agent completely bypassed learning the intended grasping behavior.
+* **Behavior**: Pushed the object to the edge of the tray, causing it to fall or slide.
+* **Outcome**: The object’s height changed by more than 5cm, satisfying the success condition.
+* **Insight**: A clear instance of reward hacking, where the agent exploits loopholes in the reward definition.
 
-5. Results:
+---
 
-Showcased Reward Hacking Phenomenon:
+## Key Insights
 
-This approach provides a clear example of "reward hacking" in reinforcement learning - a situation where an agent satisfies the defined reward criteria but in a way that doesn't align with the intended behavior. The agent found an easier path to maximize rewards by pushing rather than grasping.
+* **Reward Hacking Exposed**: This case exemplifies how RL agents can optimize for the letter of the reward function, not its spirit.
+* **Unintended Behavior**: The agent completely bypassed grasping — an undesired but valid solution under the current reward design.
 
-6. Significance
+---
 
+## Lessons Learned
 
--Demonstrates the importance of careful reward function design
--RL agents in finding optimal solutions
--Shows how unintended behaviors can emerge when success criteria are under specified
+* **Reward Function Design**: Success criteria must reflect desired outcomes, not just measurable ones.
+* **Multi-Objective Rewards**: Single-metric rewards (e.g., height alone) are insufficient for complex tasks.
+* **Constraint Specification**: All desired behaviors (e.g., gripper closure, stable lift) should be explicitly incentivized or constrained.
 
-7. Lessons Learned
+---
 
-Reward Function Design: Success metrics must be carefully defined to prevent exploitation of loopholes.
+## Future Improvements
 
-Multi-Objective Rewards: Simple height-based metrics are insufficient for complex manipulation tasks.
-Constraint Specification: All desired behaviors should be explicitly incentivized or constrained.
+To encourage true grasping behavior and prevent reward hacking:
 
-8. Future Improvements
+* Modify the reward function to include:
 
-To address the reward hacking and encourage true grasping behavior, future iterations could:
-
-Tried correcting the reward structure to measure success as lifting the object and closing the gripper as well
+  * Object height
+  * Gripper closure as a condition for success
+* Penalize non-grasp-based object displacement
+* Add intermediate rewards for initiating and completing a successful grasp
