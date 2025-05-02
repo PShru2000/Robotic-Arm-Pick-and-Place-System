@@ -4,6 +4,7 @@ from stable_baselines3 import SAC
 from env_setup_multiobject_cv import VisualRoboticArmEnv
 import matplotlib.pyplot as plt
 
+
 if __name__ == "__main__":
     env = VisualRoboticArmEnv(render=True)
 
