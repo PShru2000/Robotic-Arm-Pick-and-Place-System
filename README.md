@@ -127,8 +127,8 @@ requirements.txt                        # Python package dependencies
 ### Step 1: Clone the Repository
 
 ```bash
-git clone https://github.com/anushamanohar/CS5100.git
-cd CS5100
+git clone https://github.com/PShru2000/Robotic-Arm-Pick-and-Place-System---RL-Integrated-with-Vision-Based-Control.git
+cd Robotic-Arm-Pick-and-Place-System
 ```
 
 ### Step 2: Install Dependencies
