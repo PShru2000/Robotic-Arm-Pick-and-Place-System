@@ -1,4 +1,5 @@
 #env_setup.py
+# Single object environment
 
 # === Core Imports ===
 import gymnasium as gym
