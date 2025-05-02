@@ -1,70 +1,70 @@
-1. Problem Background
+# Hybrid RL Architecture – Final Integration and Evaluation
 
-In prior experiments:
+This phase documents the deployment and evaluation of a **hybrid reinforcement learning system** designed to overcome the grasping exploration bottleneck previously identified. By combining learned behaviors with deterministic logic, the system achieves full task completion with high reliability.
 
-The RL agent consistently mastered Stage 1: Positioning
+---
 
-However, it failed to transition to Stage 2: Grasping, despite 150,000 training steps and improved reward shaping
+## Problem Background
 
-This was identified as an exploration bottleneck, a known RL limitation when the next-stage behavior is too complex or under-incentivized
+In previous trials:
 
-2. Hybrid Control Solution
+* The RL agent **consistently mastered Stage 1**: positioning and descent.
+* However, it **failed to transition to Stage 2**: grasping, even after 150,000+ training steps and refined reward shaping.
+* This stagnation was diagnosed as an **exploration bottleneck**, a common RL issue where complex or poorly incentivized behaviors remain undiscovered.
 
-To overcome this, we implemented a hybrid RL system:
+---
 
-Stage 0 → 1 (Approach/Descent): Controlled by trained RL agent
+## Hybrid Control Solution
 
-Stage 2 → 3 (Grasp & Lift): Handled via manual scripted control
+To resolve this limitation, a **hybrid control system** was implemented:
 
-Stage 4+ (Optional Placement, Return, etc.): Remains open for future extension (RL or manual)
+### Control Allocation
 
-Implementation Details:
+* **Stage 0 → 1 (Approach & Descent)**: Handled by the trained RL policy
+* **Stage 2 → 3 (Grasp & Lift)**: Executed through deterministic, scripted control logic
+* **Stage 4+ (e.g., placement, return)**: Reserved for future extension (either RL-based or manual)
 
-A wrapper class (HybridRLEnv) detects when Stage 1 is reached
+### Implementation Details
 
-Control is handed off to manual grasp and lift logic at that point
+* A custom wrapper class (`HybridRLEnv`) was developed to **monitor stage transitions**.
+* Upon detecting completion of Stage 1, **control switches to scripted logic** for grasp and lift.
+* Post-lift, optional control can be handed back to the RL agent for continuation.
 
-After successful grasp and lift, optional control is returned to RL
+---
 
-3. Test Results
+## Test Results
 
-The hybrid system was evaluated across 5 test episodes, shown in the figure optimized_test_results.png.
+The hybrid system was evaluated across **5 test episodes** using automated metrics and visual analysis (`optimized_test_results.png`).
 
-Key Observations:
+### Key Observations:
 
-Success Rate: 100% across all test episodes
+* **Success Rate**: 100% in all episodes
+* **Grasp Attempts**: Successfully initiated by manual logic
+* **Lift Height**: Objects consistently lifted beyond threshold
+* **Time to Success**: Fixed, minimal variation
+* **Motion Smoothness**: Stable joint velocity profiles
+* **Stage Distribution**: All episodes reached final stage without failure
 
-Grasp Attempts: Successfully initiated during manual control
+---
 
-Lift Height: Object consistently lifted 
+## Significance
 
-Time to Success: Fixed, consistent across episodes
+* **Reinforcement Learning**: Provides adaptability and robustness in stages influenced by perception (e.g., visual positioning)
+* **Manual Control**: Delivers precision and reliability in stages requiring accurate, sequential motion (e.g., grasping)
 
-Motion Smoothness: Stable average joint velocity
+---
 
-Stage Distribution: All episodes reached final stage successfully
+## Lessons Learned
 
-4. Significance
+* **Reward shaping alone may not suffice** when certain behaviors are sensitive, rare, or involve sequential dependencies.
+* **Hybridization is a powerful technique** that balances RL’s generalization capabilities with rule-based reliability.
+* **Modular decomposition of tasks** allows seamless control transitions and scalable design.
 
-RL handles adaptable components (like noisy visual-based positioning)
+---
 
-Manual control ensures reliability for critical stages (like grasping)
+## Future Work
 
-
-5. Lessons Learned
-
-Reward shaping alone isn't always enough—some actions are too complex or sensitive for RL to explore effectively without risk
-
-Hybridization is efficient—it maximizes RL’s adaptability while minimizing development time
-
-Modular task breakdown enables flexible control handoffs
-
-6. Future Work
-
--Add final stages: object placement, release, and reset behavior
-
--Use RL confidence or value estimates to trigger handoffs dynamically
-
--Explore curriculum learning to gradually replace scripted logic with learned control
-
--Extend hybrid architecture to multi-object manipulation tasks
+* Implement **final task stages**: object placement, gripper release, arm reset.
+* Use **RL confidence estimates** or value predictions to **trigger dynamic handoffs** instead of fixed-stage thresholds.
+* Investigate **curriculum learning** to gradually replace manual logic with trained policies.
+* Extend the hybrid architecture for **multi-object manipulation** and generalized object grasping.
