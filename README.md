@@ -225,6 +225,11 @@ The hybrid approach integrates proven manual control sequences to handle the mor
   <img src="media/R2.png" width="400"  alt="Step 2" />
 </p>
 
+## Demo Video
+
+[Click to watch the Robotic Arm pick and place objects under Manual and Hybrid Control](https://1drv.ms/v/c/197abb547c4c950a/EYPMFl-AJNVAq57o961BhMgBSGYAl9D-5qBgiafS7k0F8w?e=7xgRwi)
+
+
 ## Conclusion
 
 This project presents a vision-integrated reinforcement learning system for robotic pick-and-place tasks. By combining YOLOv5 for object detection, depth-based 3D localization, and a custom SAC policy, the robot learns to autonomously detect, grasp, and relocate objects in simulation. A hybrid control strategy and staged rewards significantly improve reliability and learning stability.
